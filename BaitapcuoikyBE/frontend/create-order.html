@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tạo đơn hàng</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="main.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Tạo Đơn Hàng</h2>
+        <button onclick="logout()">Đăng xuất</button>
+
+        <h3>Danh sách sản phẩm</h3>
+        <div id="productList">
+            </div>
+
+        <h3>Giỏ hàng</h3>
+        <ul id="cart">
+            </ul>
+        
+        <button style="margin-top: 20px;" onclick="submitOrder()">Tạo đơn hàng</button>
+    </div>
+
+    <script>
+    let items = []; // Danh sách sản phẩm trong giỏ hàng
+
+    async function loadProducts() {
+        const res = await apiGet("/product");
+        if (res.status === 401) return logout();
+        
+        const list = await res.json();
+        const div = document.getElementById("productList");
+        div.innerHTML = '';
+
+        list.forEach(p => {
+            div.innerHTML += `
+            <p>
+                **${p.name}** - ${p.price.toLocaleString('vi-VN')}đ (Còn: ${p.stock})
+                <button onclick="addToCart(${p.id}, '${p.name}')">Thêm</button>
+            </p>`;
+        });
+    }
+
+    function addToCart(productId, productName) {
+        // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
+        const existingItem = items.find(item => item.productId === productId);
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            items.push({ productId, quantity: 1, name: productName });
+        }
+
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        const cart = document.getElementById("cart");
+        cart.innerHTML = '';
+        items.forEach(item => {
+            cart.innerHTML += `<li>${item.name} (SL: ${item.quantity})</li>`;
+        });
+    }
+
+    async function submitOrder() {
+        if (items.length === 0) {
+            alert("Giỏ hàng đang trống!");
+            return;
+        }
+
+        // Lấy danh sách items chỉ với productId và quantity để gửi lên API
+        const orderItems = items.map(item => ({
+            productId: item.productId,
+            quantity: item.quantity
+        }));
+
+        const res = await apiPost("/order", {
+            customerId: 1,  // ID của user đang login (sẽ cần lấy từ token sau khi BE hoàn thiện)
+            items: orderItems
+        });
+
+        if (res.ok) {
+            alert("Tạo đơn thành công!");
+            items = []; // Xóa giỏ hàng
+            updateCartUI(); // Cập nhật lại giao diện giỏ hàng
+        }
+        else {
+            alert("Thất bại. Có thể do thiếu quyền hoặc lỗi server.");
+        }
+    }
+
+    loadProducts();
+    </script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quản lý sản phẩm</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="main.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Danh sách sản phẩm</h2>
+        <button onclick="logout()">Đăng xuất</button>
+        
+        <table id="productTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên</th>
+                    <th>Giá</th>
+                    <th>Tồn kho</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+
+        <h3>Thêm Sản Phẩm</h3>
+        <input id="name" placeholder="Tên" type="text"><br>
+        <input id="price" placeholder="Giá" type="number"><br>
+        <input id="stock" placeholder="Tồn kho" type="number"><br>
+        <input id="desc" placeholder="Mô tả" type="text"><br>
+        <button onclick="createProduct()">Thêm</button>
+    </div>
+
+    <script>
+    async function loadProducts() {
+        const res = await apiGet("/product");
+
+        if (res.status === 401) {
+            alert("Bạn không có quyền truy cập trang này!");
+            return logout();
+        }
+
+        const list = await res.json();
+        const tableBody = document.querySelector("#productTable tbody");
+        tableBody.innerHTML = ''; // Xóa nội dung cũ
+
+        list.forEach(p => {
+            tableBody.innerHTML += `
+            <tr>
+                <td>${p.id}</td>
+                <td>${p.name}</td>
+                <td>${p.price.toLocaleString('vi-VN')}đ</td>
+                <td>${p.stock}</td>
+                <td>
+                    <button class="delete-btn" onclick="deleteProduct(${p.id})">Xóa</button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    async function createProduct() {
+        const data = {
+            name: document.getElementById("name").value,
+            price: Number(document.getElementById("price").value),
+            stock: Number(document.getElementById("stock").value),
+            description: document.getElementById("desc").value
+        };
+
+        const res = await apiPost("/product", data);
+        if (res.ok) {
+            location.reload();
+        }
+        else {
+            alert("Thêm thất bại. Kiểm tra lại dữ liệu và quyền truy cập.");
+        }
+    }
+
+    async function deleteProduct(id) {
+        if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
+        const res = await apiDelete("/product/" + id);
+        if (res.ok) {
+            location.reload();
+        } else {
+            alert("Xóa thất bại. Kiểm tra lại quyền truy cập.");
+        }
+    }
+
+    loadProducts();
+    </script>
+</body>
+</html>

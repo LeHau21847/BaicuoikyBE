@@ -1,0 +1,143 @@
+/* frontend/style.css */
+
+/* --- Thiết lập chung và Canh giữa Trang --- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #e9ecef; /* Màu nền nhẹ nhàng */
+    color: #333;
+    line-height: 1.6;
+    
+    /* Thiết lập Flexbox để canh giữa theo chiều ngang và cho phép cuộn */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column; 
+    align-items: center; /* Canh giữa theo chiều ngang */
+    justify-content: flex-start; /* Nội dung bắt đầu từ trên cùng */
+}
+
+.container {
+    max-width: 900px;
+    width: 90%; 
+    margin: 40px auto; /* Margin trên/dưới và auto cho ngang */
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.login-container {
+    max-width: 400px; /* Thu nhỏ khung đăng nhập */
+    /* Khi body đã set display: flex và align-items: center, chỉ cần margin: auto nếu muốn nó nằm hoàn toàn giữa body */
+    margin-top: 20vh; /* Đẩy xuống giữa màn hình một chút cho đẹp */
+}
+
+
+h2, h3 {
+    color: #007bff; 
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-top: 20px;
+}
+
+/* --- Input và Focus Effect --- */
+input[type="text"], input[type="password"], input[type="number"], input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; 
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); 
+    outline: none;
+}
+
+/* --- Button Hover Effects --- */
+button {
+    background-color: #28a745; 
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s;
+    margin-right: 10px;
+    text-transform: uppercase;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.delete-btn {
+    background-color: #dc3545;
+}
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+/* --- Table (Dành cho products.html) --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    overflow: hidden; /* Giúp bo góc cho table */
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+tr:hover {
+    background-color: #e9f0f7; 
+}
+
+/* --- Thông báo lỗi/thành công --- */
+#msg {
+    padding: 10px;
+    color: #dc3545; 
+    font-weight: bold;
+}
+
+/* --- Order Page (create-order.html) --- */
+#productList p {
+    padding: 10px 0;
+    border-bottom: 1px dashed #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#cart {
+    list-style: none;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-height: 50px;
+    background-color: #fcfcfc;
+}
+
+#cart li {
+    padding: 5px 0;
+    border-bottom: 1px dotted #eee;
+}

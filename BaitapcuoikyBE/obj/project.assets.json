@@ -511,24 +511,26 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Admin\\.nuget\\packages\\": {}
+    "C:\\Users\\longv\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\BaicuoikyBE\\BaicuoikyBE\\BaitapcuoikyBE\\BaitapcuoikyBE.csproj",
+      "projectUniqueName": "D:\\Code\\BaicuoikyBE\\BaitapcuoikyBE\\BaitapcuoikyBE.csproj",
       "projectName": "BaitapcuoikyBE",
-      "projectPath": "D:\\BaicuoikyBE\\BaicuoikyBE\\BaitapcuoikyBE\\BaitapcuoikyBE.csproj",
-      "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-      "outputPath": "D:\\BaicuoikyBE\\BaicuoikyBE\\BaitapcuoikyBE\\obj\\",
+      "projectPath": "D:\\Code\\BaicuoikyBE\\BaitapcuoikyBE\\BaitapcuoikyBE.csproj",
+      "packagesPath": "C:\\Users\\longv\\.nuget\\packages\\",
+      "outputPath": "D:\\Code\\BaicuoikyBE\\BaitapcuoikyBE\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\longv\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -586,7 +588,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
