@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Đơn Hàng</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="main.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Danh Sách Đơn Hàng</h2>
+            <div>
+                <a href="products.html" class="checkout-btn" style="background:#6c757d;text-decoration:none;font-size:14px;">Sản Phẩm</a>
+                <button class="logout-btn" onclick="logout()">Thoát</button>
+            </div>
+        </div>
+        <table>
+            <thead><tr><th>Mã</th><th>Khách ID</th><th>Ngày tạo</th><th>Tổng tiền</th><th>Chi tiết</th></tr></thead>
+            <tbody id="list"></tbody>
+        </table>
+    </div>
+    <script>
+    async function load() {
+        const res = await apiGet("/orders");
+        if(!res.ok) return;
+        const data = await res.json();
+        document.getElementById("list").innerHTML = data.map(o => {
+            let details = o.orderDetails.map(d => `<div style="font-size:0.9em;color:#555;">- ${d.product?.name||'SP xóa'} x${d.quantity}: ${d.unitPrice.toLocaleString()}đ</div>`).join('');
+            return `
+            <tr style="background:#f9f9f9; border-top:2px solid #ccc;">
+                <td><b>#${o.id}</b></td><td>${o.customerId}</td><td>${new Date(o.createdAt).toLocaleString()}</td>
+                <td style="color:red;font-weight:bold">${o.totalPrice.toLocaleString()}đ</td>
+                <td>Xem dưới 👇</td>
+            </tr>
+            <tr><td colspan="5" style="padding-left:20px;">${details}</td></tr>`;
+        }).join('');
+    }
+    load();
+    </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Khách Hàng</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="main.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Quản Lý Khách Hàng</h2>
+            <div>
+                <a href="products.html" class="checkout-btn" style="background:#6c757d;text-decoration:none;font-size:14px;">Sản Phẩm</a>
+                <a href="admin-orders.html" class="checkout-btn" style="background:#17a2b8;text-decoration:none;font-size:14px;">Đơn Hàng</a>
+                <button class="logout-btn" onclick="logout()">Thoát</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 id="formTitle">Thêm Khách Hàng</h3>
+            <input type="hidden" id="cId">
+            <div class="input-row">
+                <input id="cName" placeholder="Tên khách">
+                <input id="cEmail" placeholder="Email">
+                <input id="cPhone" placeholder="SĐT">
+                <input id="cAddr" placeholder="Địa chỉ">
+            </div>
+            <div style="margin-top:10px;">
+                <button onclick="saveCustomer()">Lưu Thông Tin</button>
+                <button onclick="resetForm()" style="background:#999;">Hủy</button>
+            </div>
+        </div>
+
+        <table>
+            <thead><tr><th>ID</th><th>Tên</th><th>Email</th><th>SĐT</th><th>Thao tác</th></tr></thead>
+            <tbody id="list"></tbody>
+        </table>
+    </div>
+
+    <script>
+    async function load() {
+        const res = await apiGet("/customers");
+        if(!res.ok) return;
+        const data = await res.json();
+        document.getElementById("list").innerHTML = data.map(c => `
+            <tr>
+                <td>${c.id}</td><td>${c.name}</td><td>${c.email}</td><td>${c.phone||''}</td>
+                <td>
+                    <button style="background:#ffc107;color:black" onclick="edit(${c.id},'${c.name}','${c.email}','${c.phone||''}','${c.address||''}')">Sửa</button>
+                    <button class="delete-btn" onclick="del(${c.id})">Xóa</button>
+                </td>
+            </tr>`).join('');
+    }
+    function edit(id,n,e,p,a){
+        document.getElementById('formTitle').innerText="Sửa Khách #"+id;
+        document.getElementById('cId').value=id; document.getElementById('cName').value=n;
+        document.getElementById('cEmail').value=e; document.getElementById('cPhone').value=p;
+        document.getElementById('cAddr').value=a;
+    }
+    function resetForm(){
+        document.getElementById('formTitle').innerText="Thêm Khách Hàng";
+        document.getElementById('cId').value=''; document.getElementById('cName').value='';
+        document.getElementById('cEmail').value=''; document.getElementById('cPhone').value=''; document.getElementById('cAddr').value='';
+    }
+    async function saveCustomer() {
+        const id = document.getElementById('cId').value;
+        const data = { name: document.getElementById('cName').value, email: document.getElementById('cEmail').value, phone: document.getElementById('cPhone').value, address: document.getElementById('cAddr').value };
+        
+        let res;
+        if(id) res = await fetch(API_BASE+"/customers/"+id, {method:"PUT", headers:{"Content-Type":"application/json","Authorization":"Bearer "+getToken()}, body:JSON.stringify(data)});
+        else res = await apiPost("/customers", data);
+
+        if(res.ok) { alert("Thành công"); resetForm(); load(); } else alert("Lỗi!");
+    }
+    async function del(id) { if(confirm("Xóa?")) { await apiDelete("/customers/"+id); load(); } }
+    load();
+    </script>
+</body>
+</html>

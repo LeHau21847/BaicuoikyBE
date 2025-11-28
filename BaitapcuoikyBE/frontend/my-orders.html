@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Lịch Sử Đơn Hàng</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="main.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Đơn Hàng Của Tôi</h2>
+            <div>
+                <a href="create-order.html" class="checkout-btn" style="background:#28a745;text-decoration:none;font-size:14px;">Mua thêm</a>
+                <button class="logout-btn" onclick="logout()">Thoát</button>
+            </div>
+        </div>
+        <table>
+            <thead><tr><th>Mã đơn</th><th>Ngày đặt</th><th>Tổng tiền</th><th>Sản phẩm</th></tr></thead>
+            <tbody id="list"></tbody>
+        </table>
+    </div>
+    <script>
+    async function load() {
+        const res = await apiGet("/orders/my-orders");
+        if(!res.ok) return;
+        const data = await res.json();
+        document.getElementById("list").innerHTML = data.map(o => {
+            let details = o.orderDetails.map(d => `${d.product?.name||'SP cũ'} (x${d.quantity})`).join(', ');
+            return `<tr><td>#${o.id}</td><td>${new Date(o.createdAt).toLocaleString()}</td><td style="color:red;font-weight:bold">${o.totalPrice.toLocaleString()}đ</td><td>${details}</td></tr>`;
+        }).join('');
+    }
+    load();
+    </script>
+</body>
+</html>
