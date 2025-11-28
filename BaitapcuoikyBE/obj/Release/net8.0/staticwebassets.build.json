@@ -1,1 +1,11 @@
-{"Version":1,"Hash":"KncvEusy4IJ2nf4nJLWNVeQRFjZlz9mukW5ynAW5gVI=","Source":"BaitapcuoikyBE","BasePath":"/","Mode":"Root","ManifestType":"Build","ReferencedProjectsConfiguration":[],"DiscoveryPatterns":[],"Assets":[],"Endpoints":[]}
+{
+  "Version": 1,
+  "Hash": "BBHW44fwrYB+Br0zOSZjKw8AZLMnItuFENDZ3dkWG7c=",
+  "Source": "BaitapcuoikyBE",
+  "BasePath": "_content/BaitapcuoikyBE",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

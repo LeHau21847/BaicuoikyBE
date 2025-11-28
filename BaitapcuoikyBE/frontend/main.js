@@ -1,10 +1,12 @@
 const API_BASE = "http://localhost:8090/api";
 
 // Hàm lưu Token VÀ UserId
-function saveAuthData(token, userId) {
+function saveAuthData(token, role, userId) {
     localStorage.setItem("token", token);
+    localStorage.setItem("role", role);
     localStorage.setItem("userId", userId);
 }
+
 
 // Hàm lấy Token
 function getToken() {

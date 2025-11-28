@@ -1,0 +1,66 @@
+<nav class="navbar">
+    <a href="login.html" id="nav-login">Login</a>
+
+    <!-- Admin menu -->
+    <a href="products.html" id="nav-products">Quản lý sản phẩm</a>
+    <a href="customers.html" id="nav-customers">Quản lý khách hàng</a>
+    <a href="admin-orders.html" id="nav-admin-orders">Quản lý đơn hàng</a>
+
+    <!-- User menu -->
+    <a href="create-order.html" id="nav-create-order">Tạo đơn hàng</a>
+    <a href="my-orders.html" id="nav-my-orders">Đơn hàng của tôi</a>
+
+    <a href="#" id="nav-logout" onclick="logout()">Đăng xuất</a>
+</nav>
+
+<script>
+    const role = localStorage.getItem("role");
+    const token = localStorage.getItem("token");
+
+    function hideAll() {
+        const ids = [
+            "nav-login", "nav-products", "nav-customers",
+            "nav-admin-orders", "nav-create-order",
+            "nav-my-orders", "nav-logout"
+        ];
+        ids.forEach(id => document.getElementById(id).style.display = "none");
+    }
+
+    // Nếu chưa đăng nhập → chỉ hiện Login
+    if (!token) {
+        hideAll();
+        document.getElementById("nav-login").style.display = "block";
+    } 
+    else if (role === "Admin") {
+        hideAll();
+        document.getElementById("nav-products").style.display = "block";
+        document.getElementById("nav-customers").style.display = "block";
+        document.getElementById("nav-admin-orders").style.display = "block";
+        document.getElementById("nav-logout").style.display = "block";
+    } 
+    else if (role === "User") {
+        hideAll();
+        document.getElementById("nav-create-order").style.display = "block";
+        document.getElementById("nav-my-orders").style.display = "block";
+        document.getElementById("nav-logout").style.display = "block";
+    }
+</script>
+
+<style>
+    .navbar {
+        width: 100%;
+        background-color: #007bff;
+        padding: 14px 20px;
+        display: flex;
+        gap: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .navbar a {
+        color: #fff;
+        font-weight: bold;
+        text-decoration: none;
+    }
+    .navbar a:hover {
+        text-decoration: underline;
+    }
+</style>

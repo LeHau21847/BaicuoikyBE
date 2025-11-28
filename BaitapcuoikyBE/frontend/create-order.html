@@ -7,6 +7,14 @@
     <script src="main.js"></script>
 </head>
 <body>
+    <div id="navbar"></div>
+    <script>
+        fetch("nav.html")
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById("navbar").innerHTML = html;
+            });
+    </script>
     <div class="container">
         <div class="header">
             <h2>Trang Mua Hàng</h2>
