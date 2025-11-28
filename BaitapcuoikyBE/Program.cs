@@ -8,21 +8,21 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// [FIX LỖI JSON CYCLE] Cấu hình JSON để tránh vòng lặp vô hạn (Order -> Detail -> Order...)
+// [FIX JSON CYCLE] Cấu hình JSON để tránh vòng lặp
 builder.Services.AddControllers().AddJsonOptions(x => 
     x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// [FIX LỖI CORS] Bật CORS
+// Cấu hình CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
         b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
 
-// Database (Sử dụng SQLite)
+// Database (SQLite)
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -60,12 +60,12 @@ using (var scope = app.Services.CreateScope())
     DbSeeder.Seed(db);
 }
 
-// [FIX SWAGGER] Luôn hiện Swagger (Bỏ điều kiện if IsDevelopment)
+// [FIX SWAGGER] Luôn hiện Swagger
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseRouting();
-app.UseCors("AllowAll"); // Kích hoạt CORS
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 

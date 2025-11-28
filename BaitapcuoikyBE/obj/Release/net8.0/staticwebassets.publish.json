@@ -1,11 +1,1 @@
-{
-  "Version": 1,
-  "Hash": "+9FzV1t1dnTFhWKEgeyCF52N7eU4bx26VGvqH6qsBQE=",
-  "Source": "BaitapcuoikyBE",
-  "BasePath": "_content/BaitapcuoikyBE",
-  "Mode": "Default",
-  "ManifestType": "Publish",
-  "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
-}
+{"Version":1,"Hash":"UxpM6UU+sAUOzeRr9bhR9MWChPnf7GFtWhE52ur6yXM=","Source":"BaitapcuoikyBE","BasePath":"/","Mode":"Root","ManifestType":"Publish","ReferencedProjectsConfiguration":[],"DiscoveryPatterns":[],"Assets":[],"Endpoints":[]}
