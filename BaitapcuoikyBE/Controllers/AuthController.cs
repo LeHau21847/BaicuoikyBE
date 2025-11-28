@@ -22,32 +22,16 @@ public class AuthController : ControllerBase
         _cfg = cfg;
     }
 
-    [HttpPost("register")]
-    public IActionResult Register([FromBody] RegisterDto dto)
-    {
-        if (_db.Users.Any(u => u.Email == dto.Email)) return BadRequest("Email exists");
-
-        var u = new User
-        {
-            Email = dto.Email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-            Role = dto.Role
-        };
-        _db.Users.Add(u);
-        _db.SaveChanges();
-        return CreatedAtAction(null, new { id = u.Id });
-    }
-
     [HttpPost("login")]
     public IActionResult Login([FromBody] LoginDto dto)
     {
         var user = _db.Users.SingleOrDefault(u => u.Email == dto.Email);
-        if (user == null) return Unauthorized("Invalid credentials");
-        if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash)) return Unauthorized("Invalid credentials");
+        if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash)) 
+            return Unauthorized("Invalid credentials");
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // UserId lưu ở đây
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role)
         };
@@ -62,6 +46,7 @@ public class AuthController : ControllerBase
             signingCredentials: creds
         );
 
+        // Trả về token và userid để FE lưu lại
         return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token), role = user.Role, userid = user.Id });
     }
 }

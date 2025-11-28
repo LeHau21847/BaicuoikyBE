@@ -1,16 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-    <title>Quản lý sản phẩm</title>
+    <meta charset="UTF-8">
+    <title>Quản Lý Sản Phẩm</title>
     <link rel="stylesheet" href="style.css">
     <script src="main.js"></script>
 </head>
 <body>
     <div class="container">
-        <h2>Danh sách sản phẩm</h2>
-        <button onclick="logout()">Đăng xuất</button>
-        
-        <table id="productTable">
+        <div class="header">
+            <h2>Quản Lý Sản Phẩm (Admin)</h2>
+            <div>
+                <a href="customers.html" class="checkout-btn" style="text-decoration:none; background:#17a2b8; font-size:14px; padding: 8px 15px;">👥 Khách Hàng</a>
+                <a href="admin-orders.html" class="checkout-btn" style="text-decoration:none; background:#ffc107; color:black; font-size:14px; padding: 8px 15px;">📋 Đơn Hàng</a>
+                <button class="logout-btn" onclick="logout()">Đăng xuất</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 id="formTitle">Thêm Sản Phẩm Mới</h3>
+            <input type="hidden" id="pId">
+
+            <div class="input-row">
+                <input id="pName" placeholder="Tên sản phẩm">
+                <input id="pPrice" type="number" placeholder="Giá tiền">
+                <input id="pStock" type="number" placeholder="Số lượng">
+                <input id="pDesc" placeholder="Mô tả">
+            </div>
+            <div style="margin-top: 10px;">
+                <button id="btnSave" onclick="saveProduct()">Lưu Sản Phẩm</button>
+                <button id="btnCancel" onclick="cancelEdit()" style="background: #6c757d; display: none;">Hủy Bỏ</button>
+            </div>
+        </div>
+
+        <h3>Danh Sách Sản Phẩm</h3>
+        <table>
             <thead>
                 <tr>
                     <th>ID</th>
@@ -20,72 +44,128 @@
                     <th>Hành động</th>
                 </tr>
             </thead>
-            <tbody>
-                </tbody>
+            <tbody id="productTableBody"></tbody>
         </table>
-
-        <h3>Thêm Sản Phẩm</h3>
-        <input id="name" placeholder="Tên" type="text"><br>
-        <input id="price" placeholder="Giá" type="number"><br>
-        <input id="stock" placeholder="Tồn kho" type="number"><br>
-        <input id="desc" placeholder="Mô tả" type="text"><br>
-        <button onclick="createProduct()">Thêm</button>
     </div>
 
     <script>
+    // 1. Tải danh sách
     async function loadProducts() {
-        const res = await apiGet("/product");
-
-        if (res.status === 401) {
-            alert("Bạn không có quyền truy cập trang này!");
-            return logout();
+        const res = await apiGet("/products");
+        
+        if (!res.ok) {
+            if (res.status === 401 || res.status === 403) {
+                alert("Hết phiên đăng nhập hoặc không đủ quyền!");
+                logout();
+            }
+            return;
         }
 
         const list = await res.json();
-        const tableBody = document.querySelector("#productTable tbody");
-        tableBody.innerHTML = ''; // Xóa nội dung cũ
+        const tbody = document.getElementById("productTableBody");
+        tbody.innerHTML = "";
 
         list.forEach(p => {
-            tableBody.innerHTML += `
-            <tr>
-                <td>${p.id}</td>
-                <td>${p.name}</td>
-                <td>${p.price.toLocaleString('vi-VN')}đ</td>
-                <td>${p.stock}</td>
-                <td>
-                    <button class="delete-btn" onclick="deleteProduct(${p.id})">Xóa</button>
-                </td>
-            </tr>`;
+            // Lưu ý: Nút Sửa gọi hàm startEdit với đầy đủ tham số
+            tbody.innerHTML += `
+                <tr>
+                    <td>${p.id}</td>
+                    <td>${p.name}</td>
+                    <td>${p.price.toLocaleString()} đ</td>
+                    <td>${p.stock}</td>
+                    <td>
+                        <button style="background:#ffc107; color:black" onclick="startEdit(${p.id}, '${p.name}', ${p.price}, ${p.stock}, '${p.description || ''}')">Sửa</button>
+                        <button class="delete-btn" onclick="deleteProduct(${p.id})">Xóa</button>
+                    </td>
+                </tr>
+            `;
         });
     }
 
-    async function createProduct() {
+    // 2. Chuẩn bị Form để sửa
+    function startEdit(id, name, price, stock, desc) {
+        document.getElementById("formTitle").innerText = "Cập Nhật Sản Phẩm #" + id;
+        document.getElementById("pId").value = id;
+        document.getElementById("pName").value = name;
+        document.getElementById("pPrice").value = price;
+        document.getElementById("pStock").value = stock;
+        document.getElementById("pDesc").value = desc;
+
+        document.getElementById("btnSave").innerText = "Cập Nhật";
+        document.getElementById("btnCancel").style.display = "inline-block";
+        
+        // Cuộn lên đầu trang để sửa cho dễ
+        window.scrollTo(0, 0);
+    }
+
+    // 3. Hủy sửa -> Quay về form thêm mới
+    function cancelEdit() {
+        document.getElementById("formTitle").innerText = "Thêm Sản Phẩm Mới";
+        document.getElementById("pId").value = "";
+        document.getElementById("pName").value = "";
+        document.getElementById("pPrice").value = "";
+        document.getElementById("pStock").value = "";
+        document.getElementById("pDesc").value = "";
+
+        document.getElementById("btnSave").innerText = "Lưu Sản Phẩm";
+        document.getElementById("btnCancel").style.display = "none";
+    }
+
+    // 4. Xử lý Lưu (Create hoặc Update)
+    async function saveProduct() {
+        const id = document.getElementById("pId").value;
         const data = {
-            name: document.getElementById("name").value,
-            price: Number(document.getElementById("price").value),
-            stock: Number(document.getElementById("stock").value),
-            description: document.getElementById("desc").value
+            name: document.getElementById("pName").value,
+            price: Number(document.getElementById("pPrice").value),
+            stock: Number(document.getElementById("pStock").value),
+            description: document.getElementById("pDesc").value
         };
 
-        const res = await apiPost("/product", data);
-        if (res.ok) {
-            location.reload();
+        // Validate cơ bản
+        if(!data.name || data.price < 0 || data.stock < 0) {
+            alert("Vui lòng nhập đúng thông tin (Giá và Tồn kho phải >= 0)");
+            return;
         }
-        else {
-            alert("Thêm thất bại. Kiểm tra lại dữ liệu và quyền truy cập.");
+
+        let res;
+        try {
+            if (id) {
+                // UPDATE (PUT)
+                res = await fetch(API_BASE + "/products/" + id, {
+                    method: "PUT",
+                    headers: { 
+                        "Content-Type": "application/json", 
+                        "Authorization": "Bearer " + getToken() 
+                    },
+                    body: JSON.stringify(data)
+                });
+            } else {
+                // CREATE (POST)
+                res = await apiPost("/products", data);
+            }
+
+            if (res.ok) {
+                alert(id ? "Cập nhật thành công!" : "Thêm mới thành công!");
+                cancelEdit();
+                loadProducts();
+            } else {
+                const txt = await res.text();
+                alert("Lỗi: " + txt);
+            }
+        } catch (e) {
+            alert("Lỗi kết nối! Hãy kiểm tra xem Backend đã tắt WebDAV chưa.");
         }
     }
 
+    // 5. Xóa sản phẩm
     async function deleteProduct(id) {
-        if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
-        const res = await apiDelete("/product/" + id);
-        if (res.ok) {
-            location.reload();
-        } else {
-            alert("Xóa thất bại. Kiểm tra lại quyền truy cập.");
-        }
+        if (!confirm("Bạn chắc chắn muốn xóa sản phẩm này?")) return;
+        const res = await apiDelete("/products/" + id);
+        if (res.ok) loadProducts();
+        else alert("Xóa thất bại!");
     }
 
+    // Chạy khi mở trang
     loadProducts();
     </script>
 </body>

@@ -4,19 +4,29 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using BaitapcuoikyBE.Data;
 using BaitapcuoikyBE.Models;
+using System.Text.Json.Serialization; 
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
-builder.Services.AddControllers();
+// [FIX LỖI JSON CYCLE] Cấu hình JSON để tránh vòng lặp vô hạn (Order -> Detail -> Order...)
+builder.Services.AddControllers().AddJsonOptions(x => 
+    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// DbContext (SQLite)
+// [FIX LỖI CORS] Bật CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
+
+// Database (Sử dụng SQLite)
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// JWT auth
+// JWT Auth
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
 builder.Services.AddAuthentication(options =>
 {
@@ -42,7 +52,7 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Ensure DB & seed admin
+// Seed Data
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -50,14 +60,12 @@ using (var scope = app.Services.CreateScope())
     DbSeeder.Seed(db);
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// [FIX SWAGGER] Luôn hiện Swagger (Bỏ điều kiện if IsDevelopment)
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseRouting();
-
+app.UseCors("AllowAll"); // Kích hoạt CORS
 app.UseAuthentication();
 app.UseAuthorization();
 

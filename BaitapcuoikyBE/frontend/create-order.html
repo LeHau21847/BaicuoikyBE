@@ -1,91 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-    <title>Tạo đơn hàng</title>
+    <meta charset="UTF-8">
+    <title>Đặt Hàng</title>
     <link rel="stylesheet" href="style.css">
     <script src="main.js"></script>
 </head>
 <body>
     <div class="container">
-        <h2>Tạo Đơn Hàng</h2>
-        <button onclick="logout()">Đăng xuất</button>
+        <div class="header">
+            <h2>Trang Mua Hàng</h2>
+            <div>
+                <a href="my-orders.html" class="checkout-btn" style="text-decoration:none; background:#17a2b8; font-size:14px; padding: 8px 15px;">📜 Lịch Sử Đơn</a>
+                <button class="logout-btn" onclick="logout()">Đăng xuất</button>
+            </div>
+        </div>
 
-        <h3>Danh sách sản phẩm</h3>
-        <div id="productList">
+        <div class="grid-layout">
+            <div class="card">
+                <h3>Danh Sách Sản Phẩm</h3>
+                <div id="productList">Đang tải...</div>
             </div>
 
-        <h3>Giỏ hàng</h3>
-        <ul id="cart">
-            </ul>
-        
-        <button style="margin-top: 20px;" onclick="submitOrder()">Tạo đơn hàng</button>
+            <div class="card cart-panel">
+                <h3>Giỏ Hàng Của Bạn</h3>
+                <ul id="cartList" style="list-style: none; padding: 0;"></ul>
+                
+                <div class="total-section" style="margin-top: 20px; font-weight: bold; font-size: 1.2em;">
+                    Tổng tiền: <span id="totalPrice" style="color: red;">0</span> đ
+                </div>
+                
+                <button class="checkout-btn" onclick="submitOrder()">Xác Nhận Đặt Hàng</button>
+            </div>
+        </div>
     </div>
 
     <script>
-    let items = []; // Danh sách sản phẩm trong giỏ hàng
+    let cart = []; // Biến lưu giỏ hàng tạm
 
+    // 1. Tải danh sách sản phẩm
     async function loadProducts() {
-        const res = await apiGet("/product");
-        if (res.status === 401) return logout();
+        const res = await apiGet("/products");
+        if (!res.ok) { logout(); return; }
         
         const list = await res.json();
         const div = document.getElementById("productList");
-        div.innerHTML = '';
+        div.innerHTML = "";
 
         list.forEach(p => {
             div.innerHTML += `
-            <p>
-                **${p.name}** - ${p.price.toLocaleString('vi-VN')}đ (Còn: ${p.stock})
-                <button onclick="addToCart(${p.id}, '${p.name}')">Thêm</button>
-            </p>`;
+                <div class="product-item" style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee;">
+                    <div>
+                        <strong>${p.name}</strong><br>
+                        Giá: ${p.price.toLocaleString()} đ - Kho: ${p.stock}
+                    </div>
+                    <button onclick="addToCart(${p.id}, '${p.name}', ${p.price})" style="padding:5px 10px;">Thêm</button>
+                </div>
+            `;
         });
     }
 
-    function addToCart(productId, productName) {
-        // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
-        const existingItem = items.find(item => item.productId === productId);
-        
-        if (existingItem) {
-            existingItem.quantity += 1;
+    // 2. Thêm vào giỏ
+    function addToCart(id, name, price) {
+        const existing = cart.find(x => x.productId === id);
+        if (existing) {
+            existing.quantity++;
         } else {
-            items.push({ productId, quantity: 1, name: productName });
+            cart.push({ productId: id, name: name, price: price, quantity: 1 });
         }
-
-        updateCartUI();
+        renderCart();
     }
 
-    function updateCartUI() {
-        const cart = document.getElementById("cart");
-        cart.innerHTML = '';
-        items.forEach(item => {
-            cart.innerHTML += `<li>${item.name} (SL: ${item.quantity})</li>`;
+    // 3. Vẽ lại giỏ hàng
+    function renderCart() {
+        const ul = document.getElementById("cartList");
+        ul.innerHTML = "";
+        let total = 0;
+
+        cart.forEach((item, index) => {
+            total += item.price * item.quantity;
+            ul.innerHTML += `
+                <li style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px dashed #eee; padding-bottom:5px;">
+                    <span>${item.name} (x${item.quantity})</span>
+                    <span class="remove-item" onclick="removeFromCart(${index})" style="cursor:pointer; color:red; font-weight:bold;">❌</span>
+                </li>
+            `;
         });
+
+        document.getElementById("totalPrice").innerText = total.toLocaleString();
     }
 
+    // 4. Xóa khỏi giỏ
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        renderCart();
+    }
+
+    // 5. Gửi đơn hàng (Đã sửa logic lấy UserID)
     async function submitOrder() {
-        if (items.length === 0) {
+        if (cart.length === 0) {
             alert("Giỏ hàng đang trống!");
             return;
         }
 
-        // Lấy danh sách items chỉ với productId và quantity để gửi lên API
-        const orderItems = items.map(item => ({
-            productId: item.productId,
-            quantity: item.quantity
-        }));
-
-        const res = await apiPost("/order", {
-            customerId: 1,  // ID của user đang login (sẽ cần lấy từ token sau khi BE hoàn thiện)
-            items: orderItems
-        });
-
-        if (res.ok) {
-            alert("Tạo đơn thành công!");
-            items = []; // Xóa giỏ hàng
-            updateCartUI(); // Cập nhật lại giao diện giỏ hàng
+        // Lấy UserID từ localStorage (hàm này trong main.js)
+        const userId = getUserId();
+        if (!userId) {
+            alert("Lỗi phiên đăng nhập. Vui lòng đăng nhập lại.");
+            logout();
+            return;
         }
-        else {
-            alert("Thất bại. Có thể do thiếu quyền hoặc lỗi server.");
+
+        // Tạo dữ liệu gửi đi
+        const orderData = {
+            customerId: userId,
+            items: cart.map(c => ({ productId: c.productId, quantity: c.quantity }))
+        };
+
+        try {
+            const res = await apiPost("/orders", orderData);
+            
+            if (res.ok) {
+                alert("Đặt hàng thành công!");
+                cart = []; // Xóa giỏ hàng
+                renderCart();
+                loadProducts(); // Load lại để thấy kho bị trừ
+            } else {
+                const err = await res.text();
+                // Hiển thị lỗi chi tiết từ Backend
+                alert("Lỗi đặt hàng: " + err);
+            }
+        } catch (e) {
+            alert("Lỗi kết nối Server! Vui lòng thử lại.");
         }
     }
 

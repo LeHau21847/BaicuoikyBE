@@ -1,47 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
-    <link rel="stylesheet" href="style.css"> 
+    <title>Đăng nhập</title>
+    <link rel="stylesheet" href="style.css">
     <script src="main.js"></script>
 </head>
 <body>
-    <div class="container login-container">
-        <h2>Đăng Nhập</h2>
-        <input id="email" placeholder="Email" type="text" required><br> 
-        <input id="password" type="password" placeholder="Mật khẩu" required><br>
-        <button onclick="login()">Đăng Nhập</button>
-        <p id="msg"></p>
+    <div class="container" style="max-width: 400px; margin-top: 100px;">
+        <h2 style="text-align: center;">Đăng Nhập</h2>
+        <input id="email" type="text" placeholder="Email (admin@shop.test / user@shop.test)" value="user@shop.test">
+        <input id="password" type="password" placeholder="Mật khẩu (Admin@123 / User@123)" value="User@123">
+        <button onclick="login()" style="width: 100%;">Đăng Nhập</button>
+        <p id="msg" style="color: red; text-align: center;"></p>
     </div>
-    
+
     <script>
     async function login() {
-        // Đảm bảo API_BASE đã được định nghĩa trong main.js
         const email = document.getElementById("email").value;
         const pw = document.getElementById("password").value;
 
-        const res = await fetch(API_BASE + "/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: email, password: pw })
-        });
+        try {
+            const res = await fetch(API_BASE + "/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: email, password: pw })
+            });
 
-        const msgElement = document.getElementById("msg");
-        msgElement.innerText = ""; // Xóa thông báo cũ
+            const data = await res.json();
 
-        if (!res.ok) {
-            msgElement.innerText = "Sai email hoặc mật khẩu!";
-            return;
+            if (!res.ok) {
+                document.getElementById("msg").innerText = data.message || "Đăng nhập thất bại!";
+                return;
+            }
+
+            // LƯU Ý: Lưu cả Token và UserId
+            saveAuthData(data.token, data.userid);
+
+            if (data.role === "Admin") window.location.href = "products.html";
+            else window.location.href = "create-order.html";
+
+        } catch (e) {
+            document.getElementById("msg").innerText = "Lỗi kết nối server!";
         }
-
-        const data = await res.json();
-        saveToken(data.token);
-
-        // Điều hướng theo Role
-        if (data.role === "Admin")
-            window.location.href = "products.html";
-        else
-            window.location.href = "create-order.html";
     }
     </script>
 </body>

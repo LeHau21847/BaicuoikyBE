@@ -7,7 +7,7 @@ using BaitapcuoikyBE.Models;
 namespace BaitapcuoikyBE.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/products")]
 public class ProductsController : ControllerBase
 {
     private readonly AppDbContext _db;
@@ -28,24 +28,31 @@ public class ProductsController : ControllerBase
     [HttpPost]
     public IActionResult Create([FromBody] ProductCreateDto dto)
     {
-        if (dto.Price < 0) return BadRequest("Price must be >= 0");
-        if (dto.Stock < 0) return BadRequest("Stock must be >= 0");
-
-        var p = new Product { Name = dto.Name, Price = dto.Price, Description = dto.Description, Stock = dto.Stock };
+        var p = new Product 
+        { 
+            Name = dto.Name, 
+            Price = dto.Price, 
+            Description = dto.Description, 
+            Stock = dto.Stock 
+        };
         _db.Products.Add(p);
         _db.SaveChanges();
         return CreatedAtAction(nameof(Get), new { id = p.Id }, p);
     }
 
+    // [CHỨC NĂNG MỚI] Cập nhật sản phẩm
     [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public IActionResult Update(int id, [FromBody] ProductUpdateDto dto)
     {
         var p = _db.Products.Find(id);
-        if (p == null) return NotFound();
-        if (dto.Price < 0 || dto.Stock < 0) return BadRequest();
+        if (p == null) return NotFound("Không tìm thấy sản phẩm");
 
-        p.Name = dto.Name; p.Price = dto.Price; p.Description = dto.Description; p.Stock = dto.Stock;
+        p.Name = dto.Name;
+        p.Price = dto.Price;
+        p.Description = dto.Description;
+        p.Stock = dto.Stock;
+
         _db.SaveChanges();
         return Ok(p);
     }
